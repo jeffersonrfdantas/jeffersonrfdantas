@@ -1,0 +1,27 @@
+{
+  "name": "news-ia-portal",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Portal NEWS IA com design premium, IA nativa e arquitetura Next.js.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.7",
+    "framer-motion": "^12.23.24",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zustand": "^5.0.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "typescript": "^5.7.2"
+  }
+}
