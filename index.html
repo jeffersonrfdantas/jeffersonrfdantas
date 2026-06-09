@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ponto Eletrônico Web para Professores</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app-shell" aria-labelledby="page-title">
+      <section class="hero-card">
+        <div class="hero-card__content">
+          <p class="eyebrow">Registro seguro de presença</p>
+          <h1 id="page-title">Ponto Eletrônico Web</h1>
+          <p class="hero-text">
+            Informe seu nome ou matrícula, tire uma foto no momento do registro e envie sua localização atual.
+          </p>
+        </div>
+        <div class="hero-card__badge" aria-hidden="true">✓</div>
+      </section>
+
+      <form id="attendance-form" class="attendance-card" novalidate>
+        <label class="field-group" for="teacher-name">
+          <span>Nome ou matrícula do professor</span>
+          <input
+            id="teacher-name"
+            name="teacherName"
+            type="text"
+            autocomplete="name"
+            placeholder="Ex.: Ana Silva ou 20240015"
+            required
+          />
+        </label>
+
+        <section class="camera-section" aria-labelledby="camera-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Foto obrigatória</p>
+              <h2 id="camera-title">Câmera</h2>
+            </div>
+            <button id="switch-camera" class="ghost-button" type="button">Alternar</button>
+          </div>
+
+          <div class="camera-frame">
+            <video id="camera-video" autoplay playsinline muted></video>
+            <canvas id="photo-canvas" hidden></canvas>
+            <div id="camera-placeholder" class="camera-placeholder">
+              Toque em “Ativar câmera” para iniciar.
+            </div>
+          </div>
+
+          <div class="button-grid">
+            <button id="start-camera" class="secondary-button" type="button">Ativar câmera</button>
+            <button id="capture-photo" class="secondary-button" type="button" disabled>Capturar foto</button>
+          </div>
+        </section>
+
+        <section class="status-panel" aria-live="polite">
+          <div>
+            <strong>Status da foto</strong>
+            <span id="photo-status">Nenhuma foto capturada.</span>
+          </div>
+          <div>
+            <strong>Envio</strong>
+            <span id="submit-status">Aguardando registro.</span>
+          </div>
+        </section>
+
+        <button id="submit-attendance" class="primary-button" type="submit">
+          Registrar Ponto
+        </button>
+      </form>
+
+      <aside class="help-card">
+        <h2>Antes de usar</h2>
+        <ul>
+          <li>Ao abrir a página pela primeira vez, clique em <strong>Permitir</strong> para câmera e localização.</li>
+          <li>Hospede esta página em HTTPS, como GitHub Pages ou Google Sites.</li>
+          <li>Configure a URL do Google Apps Script no arquivo <code>script.js</code>.</li>
+        </ul>
+      </aside>
+    </main>
+
+    <script src="script.js" defer></script>
+  </body>
+</html>
