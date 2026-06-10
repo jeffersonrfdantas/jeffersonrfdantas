@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Painel de progresso de uma plataforma gamificada para aprendizagem de inglês no Ensino Médio.">
+  <title>English Quest RPG | Painel de Progresso</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #090b18;
+      --bg-soft: #12162a;
+      --card: rgba(24, 30, 56, 0.82);
+      --card-strong: rgba(31, 40, 77, 0.96);
+      --primary: #8b5cf6;
+      --primary-2: #22d3ee;
+      --accent: #facc15;
+      --success: #34d399;
+      --danger: #fb7185;
+      --text: #f8fafc;
+      --muted: #aab4d4;
+      --line: rgba(255, 255, 255, 0.13);
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+      --radius-xl: 28px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 15% 12%, rgba(34, 211, 238, 0.20), transparent 30%),
+        radial-gradient(circle at 86% 6%, rgba(139, 92, 246, 0.32), transparent 30%),
+        linear-gradient(135deg, #080a17 0%, #10142b 52%, #111827 100%);
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      content: "";
+      background-image: linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 78%);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1480px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0;
+    }
+
+    .sidebar,
+    .hero,
+    .card {
+      border: 1px solid var(--line);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      min-height: calc(100vh - 48px);
+      padding: 22px;
+      border-radius: var(--radius-xl);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .brand-mark,
+    .avatar {
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--primary-2));
+      box-shadow: 0 14px 36px rgba(34, 211, 238, 0.18);
+    }
+
+    .brand-mark {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      font-size: 1.5rem;
+    }
+
+    .brand strong {
+      display: block;
+      font-size: 1.03rem;
+    }
+
+    .brand span,
+    .muted {
+      color: var(--muted);
+    }
+
+    .nav-list {
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nav-link {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 13px 14px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      color: var(--muted);
+      transition: 180ms ease;
+    }
+
+    .nav-link[aria-current="page"],
+    .nav-link:hover,
+    .nav-link:focus-visible {
+      border-color: rgba(34, 211, 238, 0.35);
+      color: var(--text);
+      background: rgba(34, 211, 238, 0.10);
+      outline: none;
+    }
+
+    .player-mini {
+      margin-top: 30px;
+      padding: 18px;
+      border: 1px solid rgba(250, 204, 21, 0.22);
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(250, 204, 21, 0.11), rgba(139, 92, 246, 0.11));
+    }
+
+    .avatar {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 12px;
+      border-radius: 22px;
+      font-size: 2rem;
+    }
+
+    .main-content {
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+      gap: 22px;
+      overflow: hidden;
+      padding: clamp(24px, 4vw, 38px);
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(135deg, rgba(139, 92, 246, 0.40), rgba(34, 211, 238, 0.10)),
+        var(--card-strong);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      width: fit-content;
+      margin-bottom: 14px;
+      padding: 7px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      color: #dbeafe;
+      background: rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    h1,
+    h2,
+    h3,
+    p {
+      margin-top: 0;
+    }
+
+    h1 {
+      max-width: 720px;
+      margin-bottom: 12px;
+      font-size: clamp(2.1rem, 5vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    h2 {
+      margin-bottom: 16px;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    h3 {
+      margin-bottom: 6px;
+      font-size: 1rem;
+    }
+
+    .hero p {
+      max-width: 720px;
+      color: #d5dcf4;
+      font-size: 1.05rem;
+      line-height: 1.7;
+    }
+
+    .hero-actions,
+    .chips,
+    .metric-grid,
+    .history-list,
+    .mission-list {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      min-height: 46px;
+      padding: 0 18px;
+      border: 0;
+      border-radius: 14px;
+      color: #06111f;
+      background: linear-gradient(135deg, var(--accent), #fb923c);
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 14px 30px rgba(250, 204, 21, 0.20);
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--line);
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: none;
+    }
+
+    .character-card {
+      display: grid;
+      gap: 16px;
+      padding: 22px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: var(--radius-lg);
+      background: rgba(4, 8, 23, 0.38);
+    }
+
+    .level-ring {
+      display: grid;
+      place-items: center;
+      width: 132px;
+      height: 132px;
+      margin: 0 auto;
+      border-radius: 50%;
+      background: conic-gradient(var(--success) 78%, rgba(255, 255, 255, 0.12) 0);
+    }
+
+    .level-ring span {
+      display: grid;
+      place-items: center;
+      width: 102px;
+      height: 102px;
+      border-radius: inherit;
+      background: #11172d;
+      font-size: 1.8rem;
+      font-weight: 900;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+      gap: 22px;
+    }
+
+    .card {
+      padding: 22px;
+      border-radius: var(--radius-lg);
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(140px, 1fr));
+    }
+
+    .metric {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .metric span {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 0.84rem;
+    }
+
+    .metric strong {
+      font-size: clamp(1.4rem, 3vw, 2.1rem);
+      letter-spacing: -0.05em;
+    }
+
+    .progress-row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr) 58px;
+      gap: 12px;
+      align-items: center;
+      margin: 16px 0;
+    }
+
+    .bar {
+      overflow: hidden;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--primary-2), var(--primary));
+    }
+
+    .chart-wrap {
+      position: relative;
+      min-height: 360px;
+    }
+
+    .mission-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mission {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.055);
+    }
+
+    .mission small,
+    .history-item small {
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      margin-bottom: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #06111f;
+      background: var(--success);
+      font-size: 0.78rem;
+      font-weight: 900;
+    }
+
+    .tag.warning {
+      background: var(--accent);
+    }
+
+    .tag.danger {
+      color: white;
+      background: var(--danger);
+    }
+
+    .history-list {
+      display: grid;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.045);
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1080px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        min-height: auto;
+      }
+
+      .nav-list {
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+      }
+
+      .player-mini {
+        display: none;
+      }
+
+      .hero,
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app-shell {
+        width: min(100% - 20px, 1480px);
+        padding: 10px 0;
+      }
+
+      .sidebar,
+      .hero,
+      .card {
+        border-radius: 20px;
+      }
+
+      .nav-list,
+      .metric-grid,
+      .mission-list {
+        grid-template-columns: 1fr;
+      }
+
+      .progress-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .history-item {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegação principal">
+      <div class="brand" aria-label="English Quest RPG">
+        <div class="brand-mark" aria-hidden="true">⚔️</div>
+        <div>
+          <strong>English Quest</strong>
+          <span>RPG Learning</span>
+        </div>
+      </div>
+
+      <nav>
+        <ul class="nav-list">
+          <li><a class="nav-link" href="#overview">🏰 Visão geral</a></li>
+          <li><a class="nav-link" href="#skills">✨ Habilidades</a></li>
+          <li><a class="nav-link" href="#missions">🗺️ Missões</a></li>
+          <li><a class="nav-link" href="#history" aria-current="page">📈 Progresso</a></li>
+        </ul>
+      </nav>
+
+      <section class="player-mini" aria-labelledby="mini-profile-title">
+        <div class="avatar" aria-hidden="true">🧙</div>
+        <h2 id="mini-profile-title">Lia Carter</h2>
+        <p class="muted">Classe: Word Mage<br>Nível 12 • 8 dias de sequência</p>
+      </section>
+    </aside>
+
+    <main class="main-content">
+      <section id="overview" class="hero" aria-labelledby="page-title">
+        <div>
+          <span class="eyebrow">🔥 Jornada ativa • Capítulo 3: The Lost Library</span>
+          <h1 id="page-title">Painel de Progresso do Aluno</h1>
+          <p>Veja sua evolução em tempo real, acompanhe atributos de inglês e receba missões de reforço baseadas no seu histórico de aprendizagem.</p>
+          <div class="hero-actions" aria-label="Ações rápidas">
+            <a class="btn" href="#missions">Continuar missão</a>
+            <a class="btn secondary" href="#skills">Ver atributos</a>
+          </div>
+        </div>
+
+        <article class="character-card" aria-labelledby="character-title">
+          <div class="level-ring" role="img" aria-label="78 por cento do caminho para o próximo nível"><span>Lv. 12</span></div>
+          <div>
+            <h2 id="character-title">Ficha de personagem</h2>
+            <p class="muted">XP: <strong id="xp-value">0</strong> / 9.000 • Moedas: <strong id="coin-value">0</strong></p>
+          </div>
+          <div class="chips" aria-label="Conquistas recentes">
+            <span class="tag">Grammar Streak</span>
+            <span class="tag warning">NPC Listener</span>
+          </div>
+        </article>
+      </section>
+
+      <section class="metric-grid" aria-label="Resumo de indicadores">
+        <article class="metric">
+          <span>Tempo total</span>
+          <strong id="total-time">--</strong>
+        </article>
+        <article class="metric">
+          <span>Tempo nesta semana</span>
+          <strong id="weekly-time">--</strong>
+        </article>
+        <article class="metric">
+          <span>Missões concluídas</span>
+          <strong id="completed-missions">--</strong>
+        </article>
+        <article class="metric">
+          <span>Precisão média</span>
+          <strong id="accuracy">--</strong>
+        </article>
+      </section>
+
+      <div class="content-grid">
+        <section id="skills" class="card" aria-labelledby="skills-title">
+          <h2 id="skills-title">Atributos de habilidades</h2>
+          <p class="muted">O gráfico radar mostra a evolução do aluno nas competências linguísticas principais.</p>
+          <div class="chart-wrap">
+            <canvas id="skillsChart" aria-label="Gráfico radar com pontuação em Reading, Listening, Speaking, Writing e Grammar" role="img"></canvas>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="time-title">
+          <h2 id="time-title">Tempo por missão</h2>
+          <p class="muted">Distribuição do tempo dedicado às trilhas mais recentes.</p>
+          <div id="mission-time-list"></div>
+        </section>
+      </div>
+
+      <section id="missions" class="card" aria-labelledby="missions-title">
+        <h2 id="missions-title">Próximas missões recomendadas</h2>
+        <div class="mission-list" id="recommended-missions"></div>
+      </section>
+
+      <section id="history" class="card" aria-labelledby="history-title">
+        <h2 id="history-title">Histórico e diagnóstico</h2>
+        <div class="history-list" id="history-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const studentProgress = {
+      xp: 7020,
+      coins: 438,
+      totalMinutes: 1870,
+      weeklyMinutes: 245,
+      completedMissions: 37,
+      accuracy: 84,
+      skills: {
+        Reading: 82,
+        Listening: 68,
+        Speaking: 54,
+        Writing: 61,
+        Grammar: 76
+      },
+      missionTimes: [
+        { name: 'Vocabulary: Rune Match', minutes: 420 },
+        { name: 'Grammar: Sentence Gate', minutes: 360 },
+        { name: 'Listening: NPC Choice', minutes: 285 },
+        { name: 'Reading: Secret Letters', minutes: 510 },
+        { name: 'Writing: Guild Report', minutes: 295 }
+      ],
+      recommendations: [
+        {
+          skill: 'Listening',
+          title: 'Echoes in the Market',
+          description: 'Ouça diálogos de NPCs e escolha a melhor resposta para negociar pistas.',
+          tag: 'Reforço sugerido'
+        },
+        {
+          skill: 'Speaking',
+          title: 'Guild Voice Trial',
+          description: 'Pratique respostas curtas em situações de missão com rubrica de pronúncia.',
+          tag: 'Atributo menor'
+        },
+        {
+          skill: 'Grammar',
+          title: 'Bridge of Conditionals',
+          description: 'Construa frases condicionais para atravessar rotas alternativas no mapa.',
+          tag: 'Boa evolução'
+        },
+        {
+          skill: 'Reading',
+          title: 'The Archivist Puzzle',
+          description: 'Interprete cartas antigas com pistas cronometradas e perguntas inferenciais.',
+          tag: 'Desafio extra'
+        }
+      ],
+      history: [
+        { label: 'Ponto forte', detail: 'Reading mantém alta precisão em inferência contextual.', status: '82%' },
+        { label: 'Atenção', detail: 'Listening cai quando o áudio inclui contrações e fala rápida.', status: '68%' },
+        { label: 'Reforço', detail: 'Speaking precisa de prática curta e frequente durante a semana.', status: '54%' }
+      ]
+    };
+
+    const formatTime = (minutes) => {
+      const hours = Math.floor(minutes / 60);
+      const remaining = minutes % 60;
+      return `${hours}h ${remaining}min`;
+    };
+
+    document.getElementById('xp-value').textContent = studentProgress.xp.toLocaleString('pt-BR');
+    document.getElementById('coin-value').textContent = studentProgress.coins.toLocaleString('pt-BR');
+    document.getElementById('total-time').textContent = formatTime(studentProgress.totalMinutes);
+    document.getElementById('weekly-time').textContent = formatTime(studentProgress.weeklyMinutes);
+    document.getElementById('completed-missions').textContent = studentProgress.completedMissions;
+    document.getElementById('accuracy').textContent = `${studentProgress.accuracy}%`;
+
+    const maxMissionMinutes = Math.max(...studentProgress.missionTimes.map((mission) => mission.minutes));
+    document.getElementById('mission-time-list').innerHTML = studentProgress.missionTimes.map((mission) => `
+      <div class="progress-row">
+        <strong>${mission.name}</strong>
+        <div class="bar" aria-label="${mission.name}: ${formatTime(mission.minutes)}">
+          <span style="width: ${(mission.minutes / maxMissionMinutes) * 100}%"></span>
+        </div>
+        <span class="muted">${formatTime(mission.minutes)}</span>
+      </div>
+    `).join('');
+
+    document.getElementById('recommended-missions').innerHTML = studentProgress.recommendations.map((mission) => `
+      <article class="mission">
+        <span class="tag ${mission.tag.includes('Reforço') || mission.tag.includes('menor') ? 'danger' : mission.tag.includes('Desafio') ? 'warning' : ''}">${mission.skill}</span>
+        <h3>${mission.title}</h3>
+        <p>${mission.description}</p>
+        <small>${mission.tag}</small>
+      </article>
+    `).join('');
+
+    document.getElementById('history-list').innerHTML = studentProgress.history.map((item) => `
+      <article class="history-item">
+        <div>
+          <h3>${item.label}</h3>
+          <small>${item.detail}</small>
+        </div>
+        <strong>${item.status}</strong>
+      </article>
+    `).join('');
+
+    const ctx = document.getElementById('skillsChart');
+    new Chart(ctx, {
+      type: 'radar',
+      data: {
+        labels: Object.keys(studentProgress.skills),
+        datasets: [{
+          label: 'Atributos atuais',
+          data: Object.values(studentProgress.skills),
+          fill: true,
+          backgroundColor: 'rgba(34, 211, 238, 0.18)',
+          borderColor: '#22d3ee',
+          pointBackgroundColor: '#facc15',
+          pointBorderColor: '#090b18',
+          pointHoverBackgroundColor: '#ffffff',
+          pointHoverBorderColor: '#8b5cf6'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            labels: { color: '#f8fafc', font: { weight: 'bold' } }
+          }
+        },
+        scales: {
+          r: {
+            min: 0,
+            max: 100,
+            ticks: {
+              stepSize: 20,
+              color: '#aab4d4',
+              backdropColor: 'transparent'
+            },
+            angleLines: { color: 'rgba(255, 255, 255, 0.16)' },
+            grid: { color: 'rgba(255, 255, 255, 0.14)' },
+            pointLabels: { color: '#f8fafc', font: { size: 13, weight: '700' } }
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
